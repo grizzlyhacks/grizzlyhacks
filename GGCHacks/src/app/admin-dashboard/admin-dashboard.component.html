@@ -1,2 +1,85 @@
+<div class="card mt-4 shadow-sm">
+  <div class="card-header bg-dark text-white">
+    <h5 class="mb-0">Manage Menu Links</h5>
+  </div>
+  <div class="card-body">
+    <form (ngSubmit)="submitMenuLink()" class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Label</label>
+        <input class="form-control" type="text" name="menuLabel" [(ngModel)]="menuLinkForm.label" placeholder="Registration" />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Internal Route</label>
+        <input class="form-control" type="text" name="menuRoute" [(ngModel)]="menuLinkForm.route" placeholder="/home" />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">External URL</label>
+        <input class="form-control" type="text" name="menuUrl" [(ngModel)]="menuLinkForm.url" placeholder="https://example.com" />
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label d-block">Link type</label>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="menuIsExternal" [(ngModel)]="menuLinkForm.isExternal" id="menuIsExternal" />
+          <label class="form-check-label" for="menuIsExternal">External URL</label>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label d-block">Visible</label>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="menuIsVisible" [(ngModel)]="menuLinkForm.isVisible" id="menuIsVisible" />
+          <label class="form-check-label" for="menuIsVisible">Show on site</label>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Order</label>
+        <input class="form-control" type="number" min="0" name="menuOrder" [(ngModel)]="menuLinkForm.order" />
+      </div>
+
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">{{ editingMenuLinkId ? 'Update Link' : 'Add Link' }}</button>
+        <button class="btn btn-outline-secondary" type="button" (click)="resetMenuLinkForm()" *ngIf="editingMenuLinkId">Cancel</button>
+      </div>
+    </form>
+
+    <hr />
+
+    <div class="table-responsive mt-3">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Label</th>
+            <th>Type</th>
+            <th>Target</th>
+            <th>Visible</th>
+            <th>Order</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let link of menuLinks">
+            <td>{{ link.label }}</td>
+            <td>{{ link.isExternal ? 'External' : 'Internal' }}</td>
+            <td>{{ link.isExternal ? (link.url || '—') : (link.route || '—') }}</td>
+            <td>{{ link.isVisible ? 'Yes' : 'No' }}</td>
+            <td>{{ link.order }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2" type="button" (click)="editMenuLink(link)">Edit</button>
+              <button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteMenuLink(link.documentID)">Delete</button>
+            </td>
+          </tr>
+          <tr *ngIf="menuLinks.length === 0">
+            <td colspan="6" class="text-center text-muted">No menu links configured yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- Firestore Content Editor Section -->
 <app-firestore-editor></app-firestore-editor>

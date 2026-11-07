@@ -7,6 +7,7 @@ import {
 } from "@angular/fire/compat/firestore";
 import { AngularFireStorage } from "@angular/fire/compat/storage";
 import { AuthService } from "../services/auth.service";
+import { MenuLink, MenuLinksService } from "../services/menu-links.service";
 
 @Component({
   selector: "app-admin-dashboard",
@@ -27,11 +28,22 @@ export class AdminDashboardComponent {
   isDragOver = false;
   isUploading = false;
   uploadProgress = 0;
+  menuLinks: MenuLink[] = [];
+  editingMenuLinkId: string | null = null;
+  menuLinkForm = {
+    label: "",
+    route: "",
+    url: "",
+    isExternal: false,
+    isVisible: true,
+    order: 0
+  };
 
   constructor(
     private afs: AngularFirestore,
     public auth: AuthService,
-    private storage: AngularFireStorage
+    private storage: AngularFireStorage,
+    private menuLinksService: MenuLinksService
   ) {
     this.isCreatingEvent = false;
 
@@ -40,6 +52,7 @@ export class AdminDashboardComponent {
   async ngOnInit(): Promise<void> {
     await this.fetchAllUsers();
     await this.loadFlyers();
+    this.loadMenuLinks();
   } /**
 
        * Fetches all users from Firestore using pagination.
@@ -279,6 +292,83 @@ export class AdminDashboardComponent {
         break;
       }
     }
+  }
+
+  loadMenuLinks(): void {
+    this.menuLinksService.getMenuLinks().subscribe((links: MenuLink[]) => {
+      this.menuLinks = links;
+    });
+  }
+
+  submitMenuLink(): void {
+    if (!this.menuLinkForm.label.trim()) {
+      alert('Menu link label is required.');
+      return;
+    }
+
+    const payload: Partial<MenuLink> = {
+      label: this.menuLinkForm.label.trim(),
+      route: this.menuLinkForm.route?.trim() || '',
+      url: this.menuLinkForm.url?.trim() || '',
+      isExternal: this.menuLinkForm.isExternal,
+      isVisible: this.menuLinkForm.isVisible,
+      order: this.menuLinkForm.order || this.menuLinks.length + 1
+    };
+
+    if (this.editingMenuLinkId) {
+      this.menuLinksService.updateMenuLink(this.editingMenuLinkId, payload)
+        .then(() => {
+          alert('Menu link updated successfully.');
+          this.resetMenuLinkForm();
+        })
+        .catch(() => alert('Failed to update menu link.'));
+      return;
+    }
+
+    this.menuLinksService.addMenuLink(payload)
+      .then(() => {
+        alert('Menu link added successfully.');
+        this.resetMenuLinkForm();
+      })
+      .catch(() => alert('Failed to create menu link.'));
+  }
+
+  editMenuLink(link: MenuLink): void {
+    this.editingMenuLinkId = link.documentID;
+    this.menuLinkForm = {
+      label: link.label,
+      route: link.route || '',
+      url: link.url || '',
+      isExternal: !!link.isExternal,
+      isVisible: link.isVisible !== false,
+      order: link.order || 0
+    };
+  }
+
+  deleteMenuLink(documentID: string): void {
+    if (!confirm('Delete this menu link?')) {
+      return;
+    }
+
+    this.menuLinksService.deleteMenuLink(documentID)
+      .then(() => {
+        if (this.editingMenuLinkId === documentID) {
+          this.resetMenuLinkForm();
+        }
+      })
+      .catch(() => alert('Failed to delete menu link.'));
+  }
+
+  resetMenuLinkForm(): void {
+    this.editingMenuLinkId = null;
+    this.menuLinkForm = {
+      label: '',
+      route: '',
+      url: '',
+      isExternal: false,
+      isVisible: true,
+      order: this.menuLinks.length + 1
+    };
   }
 
   //this object holds the new event data
