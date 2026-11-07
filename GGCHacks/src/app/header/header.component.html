@@ -27,57 +27,24 @@
     <!-- Nav Links -->
     <div class="collapse navbar-collapse" id="navmenu">
       <ul class="navbar-nav ms-auto text-end w-100">
-
-        <!-- Home -->
-        <li class="nav-item">
-          <button class="btn btn-sm" routerLink="/home">Home</button>
-        </li>
-
-        <!-- Overview (Public) -->
-        <!--li class="nav-item">
-          <button class="btn btn-sm" routerLink="/overview">Hackathon</button>
-        </li-->
-
-        <!-- View Schedule (Public) -->
-        <!--li class="nav-item">
-          <button class="btn btn-sm " type="button" routerLink="/timeline">View Schedule</button>
-        </li-->
-
-        <!-- Registration (Public) -->
-        <li class="nav-item">
+        <li class="nav-item" *ngFor="let link of links">
           <button
+            *ngIf="!link.isExternal && link.route"
+            class="btn btn-sm"
+            type="button"
+            [routerLink]="link.route">
+            {{ link.label }}
+          </button>
+
+          <button
+            *ngIf="link.isExternal && link.url"
             class="btn-primary btn-lg"
             type="button"
-            (click)="openExternalLink('https://cglink.me/2rV/r387555')">
-            Registration
+            (click)="openLink(link)">
+            {{ link.label }}
           </button>
         </li>
 
-        <!-- Schedule/booklet (Public) -->
-        <li class="nav-item">
-          <button
-            class="btn-primary btn-lg"
-            type="button"
-            (click)="openExternalLink('https://canva.link/ofsngwuvef7txsk')">
-            Schedule
-          </button>
-        </li>
-        
-        <!-- Submit Project to Devpost (Public) -->
-        <li class="nav-item">
-          <button
-            class="btn-primary btn-lg"
-            type="button"
-            (click)="openExternalLink('https://hack-ggc-vi.devpost.com/')">
-            Submit Project
-          </button>
-        </li>
-        
-        <!-- Events (Public) -->
-        <li class="nav-item">
-          <button class="btn btn-sm" routerLink="/blogHome">Past Events</button>
-        </li>
-        
         <!-- Admin Dashboard (Admin Only) -->
         <li class="nav-item" *ngIf="auth.user && auth.adminLevel > 0">
           <button class="btn btn-sm" routerLink="/admin">Admin Dashboard</button>
